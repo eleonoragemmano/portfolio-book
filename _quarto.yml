@@ -1,0 +1,25 @@
+project:
+  type: book
+
+book:
+  title: "Data Science Portfolio""
+  author: "Eleonora Gemmano"
+  chapters:
+    - intro.qmd          # Panoramica dei progetti presenti nel libro
+    - text: "Lab 1: PTB-XL EDA"
+      file: chapter-1.qmd # Il primo progetto (quello di oggi su PTB-XL)
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+  pdf:
+    documentclass: scrreprt
+
+
+

@@ -1,0 +1,9 @@
+.quarto/
+_site/
+_book/
+*.desktop
+*.pdf
+*.odt
+*.Rhistory
+*.Rdata
+data/raw/
