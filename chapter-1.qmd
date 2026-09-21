@@ -1,6 +1,189 @@
 ---
-title: "Profiling ECG Characteristics Across Age and Sex: PTB-XL Metadata"
+title: "Exploring Patterns in Hepatitis Patient Data"
 author: "Eleonora Gemmano"
 format: html
 ---
 
+## Research Question
+
+>
+
+---
+
+## Dataset and data source
+
+### Dataset description
+
+The Hepatitis dataset contains clinical information on 155 patients with hepatitis and was originally collected in November 1988. The dataset was donated by G. Gong of Carnegie Mellon University through Bojan Cestnik of the Jozef Stefan Institute in Ljubljana. It contains 20 attributes, including the outcome variable and a combination of demographic, clinical, and laboratory measurements.
+
+The main outcome variable is *Class*, which records the patient's outcome as either *DIE* or *LIVE*. The remaining variables describe patient characteristics such as *age* and *sex*, clinical symptoms and signs such as *fatigue*, *malaise*, *anorexia*, *liver enlargement*, *ascites*, and *varices*, as well as treatment-related variables such as *steroid* and *antiviral* use.
+
+Several laboratory measurements are also included, including *bilirubin*, *alkaline phosphatase*, *SGOT*, *albumin*, and *prothrombin time (protime)*.
+
+### Downloading source and download
+
+The dataset was imported into R using `readr::read_csv()`. Since the original data file does not contain column names, the `col_names` argument was set to `FALSE`, and missing values represented by `?` were converted to NA.
+
+The accompanying *hepatitis.names* file was then used to verify the structure of the dataset and the meaning of its variables. It also provides the original coding of the categorical variables and identifies the number of missing values for each attribute. 
+
+```{r}
+url <- "https://archive.ics.uci.edu/static/public/46/hepatitis.zip"
+
+dir.create("data", showWarnings = FALSE)
+
+download.file(
+  url = url,
+  destfile = "data/hepatitis.zip",
+  mode = "wb"
+)
+
+unzip(
+  "data/hepatitis.zip",
+  exdir = "data/hepatitis"
+)
+
+list.files(
+  "data/hepatitis",
+  recursive = TRUE
+)
+
+hepatitis_raw <- readr::read_csv(
+  "data/hepatitis/hepatitis.data",
+  col_names = FALSE,
+  na = "?"
+)
+
+names_file <- readLines(
+  "data/hepatitis/hepatitis.names"
+)
+
+cat(names_file, sep = "\n")
+
+names(hepatitis_raw) <- c(
+  "class",
+  "age",
+  "sex",
+  "steroid",
+  "antivirals",
+  "fatigue",
+  "malaise",
+  "anorexia",
+  "liver_big",
+  "liver_firm",
+  "spleen_palpable",
+  "spiders",
+  "ascites",
+  "varices",
+  "bilirubin",
+  "alk_phosphate",
+  "sgot",
+  "albumin",
+  "protime",
+  "histology"
+)
+
+```
+
+
+## Exploratory Data Analysis
+
+### Initial inspection
+
+The `skim()` summary provides an initial overview of the dataset and shows that the Hepatitis data contain 155 observations and 20 variables. At this stage, all variables are stored as numeric, although several of them represent categorical characteristics such as *class*, *sex*, symptoms and clinical conditions. This highlights the need to appropriately define variable types before proceeding with further analysis.
+
+The dataset contains both demographic and clinical information, as well as several laboratory measurements. The amount of missing data varies considerably across variables. Most variables have few or no missing observations, while *protime* has the highest amount of missing data, with 67 missing values out of 155 observations. Other variables with a relatively higher number of missing values include *alk_phosphate* (29), *albumin* (16) and *liver_firm* (11). In contrast, variables such as *age*, *sex*, *antivirals*, and *histology* have no missing observations.
+
+```{r}
+hepatitis_raw |> 
+  skimr::skim() 
+```
+
+Table @tbl-first-observations shows the first three observations and provides an initial view of the structure of the dataset. 
+
+```{r}
+#| label: tbl-first-observations
+#| tbl-cap: "First three observations of the Hepatitis dataset"
+#| 
+hepatitis_raw |>
+  janitor::clean_names() |>        
+  dplyr::slice(1:3) |> 
+  gt::gt() |> 
+  gt::opt_stylize(style = 4)
+```
+
+The frequency distribution of *class*,reported in Table @tbl-class-distribution, shows that the dataset contains 32 observations in category 1 and 123 observations in category 2, corresponding to approximately 20.6% and 79.4% of the sample, respectively. According to the dataset documentation, these categories correspond to DIE and LIVE. Therefore, the two outcome groups are not equally represented, with the LIVE category accounting for the majority of observations.
+```{r}
+#| label: tbl-class-distribution
+#| tbl-cap: "Distribution of patient outcomes"
+hepatitis_raw |>
+  janitor::tabyl(class) |>     
+  gt::gt() |> 
+  gt::opt_stylize(style = 4)
+```
+
+To improve the interpretability of the dataset, categorical variables were recoded from numerical values into factors with descriptive labels, as shown in Table @tbl-recoded-data. For example, the *class* variable is now represented by the categories DIE and LIVE, while *sex* is coded as male and female and binary clinical variables are represented as no and yes. 
+```{r}
+#| label: tbl-recoded-data
+#| tbl-cap: "First three observations after recoding categorical variables"
+
+hepatitis <- hepatitis_raw |>
+  janitor::clean_names() |>
+  dplyr::mutate(
+    class = factor(
+      class,
+      levels = c(1, 2),
+      labels = c("DIE", "LIVE")
+    ),
+    
+    sex = factor(
+      sex,
+      levels = c(1, 2),
+      labels = c("male", "female")
+    ),
+    
+    dplyr::across(
+      c(
+        steroid,
+        antivirals,
+        fatigue,
+        malaise,
+        anorexia,
+        liver_big,
+        liver_firm,
+        spleen_palpable,
+        spiders,
+        ascites,
+        varices,
+        histology
+      ),
+      ~ factor(
+        .x,
+        levels = c(1, 2),
+        labels = c("no", "yes")
+      )
+    )
+  )
+
+hepatitis |>
+  dplyr::slice(1:3) |> 
+  gt::gt() |> 
+  gt::opt_stylize(style = 4)
+```
+
+The distribution of missing values is shown in Figure @fig-missing-by-variable. Figure @fig-missing-pattern shows an overall missingness rate of 5.4%, indicating that the vast majority of the data (94.6%) is present. Missingness is generally limited for most variables, but a substantially higher proportion of values is missing for *protime*. This variable contains 67 missing observations out of 155, meaning that information on prothrombin time is available for only 88 patients. *Alk_phosphate* also has a relatively high number of missing observations, with 29 missing values.
+
+The presence of missing values is therefore an important feature of this dataset and should be considered when interpreting the results. In particular, removing all observations containing at least one missing value would substantially reduce the available sample because missingness is present across several variables. For this reason, missing values will be retained as NA in the main dataset and observations will be excluded only when necessary for analyses involving a specific variable. Missing values will be kept as NA rather than replaced, as the original dataset does not provide enough information to determine their actual values.
+
+```{r}
+#| label: fig-missing-by-variable
+#| fig-cap: "Number of missing values by variable"
+#| 
+naniar::gg_miss_var(hepatitis_raw)
+```
+
+
+```{r}
+#| label: fig-missing-pattern
+#| fig-cap: "Pattern of missing values across observations and variables"
+naniar::vis_miss(hepatitis)
+```
