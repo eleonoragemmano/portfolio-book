@@ -1,5 +1,16 @@
 ---
-title: "Profiling ECG Characteristics Across Age and Sex: PTB-XL Metadata"
+title: "Data Science Portfolio"
 author: "Eleonora Gemmano"
-format: html
+date: last-modified
 ---
+
+# Welcome {.unnumbered}
+
+Welcome to my Data Science portfolio book. 
+
+## Portfolio Structure
+
+* **Chapter 1: Exploratory Data Analysis (PTB-XL Dataset)**  
+  An investigation into clinical ECG characteristics (such as heart axis and infarction stages) across patient demographics (age and sex) using the PhysioNet PTB-XL database.
+
+

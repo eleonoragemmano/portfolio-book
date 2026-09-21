@@ -7,3 +7,6 @@ _book/
 *.Rhistory
 *.Rdata
 data/raw/
+
+/.quarto/
+**/*.quarto_ipynb
