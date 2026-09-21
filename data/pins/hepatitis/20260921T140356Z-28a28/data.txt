@@ -1,0 +1,10 @@
+file: hepatitis.rds
+file_size: 2791
+pin_hash: 28a28bb67397cf55
+type: rds
+title: 'hepatitis: a pinned 155 x 20 data frame'
+description: UCI Hepatitis dataset versioned snapshot
+tags: ~
+urls: ~
+created: 20260921T140356Z
+api_version: 1
